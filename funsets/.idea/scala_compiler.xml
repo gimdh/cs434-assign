@@ -2,10 +2,14 @@
 <project version="4">
   <component name="ScalaCompilerConfiguration">
     <option name="incrementalityType" value="SBT" />
-    <profile name="sbt 1" modules="funsets_3201,recitations" />
+    <profile name="sbt 1" modules="funsets_6978" />
     <profile name="sbt 2" modules="assignment,submission">
       <option name="deprecationWarnings" value="true" />
-      <option name="featureWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <option name="optimiseBytecode" value="true" />
+      <parameters>
+        <parameter value="-Yinline-warnings" />
+      </parameters>
     </profile>
   </component>
 </project>

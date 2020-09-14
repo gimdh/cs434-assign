@@ -686,7 +686,7 @@ object ProgFunBuild extends Build {
     apiKeyR match {
       case Value(originalApiKey) if (!originalApiKey.isEmpty) =>
         val apiKey = projectDetails.courseId match { // OMG what a hack!!!
-          case "progfun-005" => "jqw9WQi3MgvmOJsK-fix"
+          case "progfun-006" => "iqw9WQi3MgvmOJsK"
           case "reactive-001" => "Pwnc6dEcYBBAuCSP2mof-react"
           case "progfun2-002" => "iqw9WQi3MgvmOJsK"
           case "parprog-001" => "jqw9WQi3MgvmOJsK-parprog"

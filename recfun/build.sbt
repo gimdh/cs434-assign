@@ -65,7 +65,7 @@ fork := {
 
 // See documentation in ProgFunBuild.scala
 projectDetailsMap := {
-val currentCourseId = "progfun-005"
+val currentCourseId = "progfun-006"
 Map(
   "example" ->  ProjectDetails(
                   packageName = "example",
@@ -195,6 +195,7 @@ handoutFiles <<= (baseDirectory, projectDetailsMap, commonSourcePackages, parPro
     (basedir / "project" ** ("*.scala" || "*.sbt")) +++
     (basedir / "project" / "scalastyle_config.xml") +++
     (basedir / "project" / "scalastyle_config_reactive.xml") +++
+    (basedir / "lib_managed" ** "*.jar") +++
     (basedir * (".classpath" || ".project")) +++
     (basedir / ".settings" / "org.scala-ide.sdt.core.prefs")
   }

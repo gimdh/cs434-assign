@@ -1,5 +1,5 @@
 <projectDescription>
-  <name>progfun-objsets</name>
+  <name>objsets</name>
   <buildSpec>
     <buildCommand>
       <name>org.scala-ide.sdt.core.scalabuilder</name>

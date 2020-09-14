@@ -1,10 +1,12 @@
-import dispatch.{Request, Http, NoLogging, StatusCode, url}
-import cc.spray.json.{JsNull, JsonParser, DefaultJsonProtocol, JsValue}
+import dispatch.classic.{Request, Http, NoLogging, StatusCode, ConfiguredHttpClient, url}
+import spray.json.{JsNull, JsonParser, DefaultJsonProtocol, JsValue}
 import RichJsValue._
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.codec.binary.{Hex, Base64}
 import java.io.{IOException, File, FileInputStream}
-import scalaz.Scalaz.{mkIdentity, ValidationNEL}
+
+import scalaz._
+import Scalaz._
 
 import Settings._
 import sbt._
@@ -20,7 +22,7 @@ object SubmitJsonProtocol extends DefaultJsonProtocol {
 // forwarder to circumvent deprecation
 object DeprectaionForwarder {
 
-  @deprecated("", "") class FwdClass { def insecureClientForwarder(credentials: dispatch.Http.CurrentCredentials) = insecureClient(credentials) }; object FwdClass extends FwdClass
+  @deprecated("", "") class FwdClass { def insecureClientForwarder(credentials: Http.CurrentCredentials) = insecureClient(credentials) }; object FwdClass extends FwdClass
   import org.apache.http.impl.client.DefaultHttpClient
   import org.apache.http.conn.ssl._
   import org.apache.http.conn.scheme._
@@ -40,7 +42,7 @@ object DeprectaionForwarder {
     }
   }
 
-  @deprecated("", "") def insecureClient(credentials: dispatch.Http.CurrentCredentials) = {
+  @deprecated("", "") def insecureClient(credentials: Http.CurrentCredentials) = {
     val sslContext = SSLContext.getInstance("TLS");
     sslContext.init(null, Array(new NaiveTrustManager()), new SecureRandom());
     val sf = new SSLSocketFactory(sslContext, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
@@ -49,7 +51,7 @@ object DeprectaionForwarder {
     val schemeRegistry = new SchemeRegistry();
     schemeRegistry.register(httpsScheme);
 
-    val dispatch_client = new dispatch.ConfiguredHttpClient(credentials)
+    val dispatch_client = new ConfiguredHttpClient(credentials)
     val params = dispatch_client.createHttpParams
     val cm = new SingleClientConnManager(params, schemeRegistry);
 
@@ -66,7 +68,7 @@ object CourseraHttp {
   }
 
 
-  private def executeRequest[T](req: Request)(parse: String => ValidationNEL[String, T]): ValidationNEL[String, T] = {
+  private def executeRequest[T](req: Request)(parse: String => ValidationNel[String, T]): ValidationNel[String, T] = {
     try {
       try http(req >- { res => parse(res) }) catch {
         case ex: javax.net.ssl.SSLPeerUnverifiedException =>
@@ -74,9 +76,9 @@ object CourseraHttp {
       }
     } catch {
       case ex: IOException =>
-        ("Connection failed\n"+ ex.toString()).failNel
+        ("Connection failed\n"+ ex.toString()).failureNel
       case StatusCode(code, message) =>
-        ("HTTP failed with status "+ code +"\n"+ message).failNel
+        ("HTTP failed with status "+ code +"\n"+ message).failureNel
     }
   }
 
@@ -85,7 +87,7 @@ object CourseraHttp {
    * SUBMITTING
    */
 
-  def getChallenge(email: String, submitProject: ProjectDetails): ValidationNEL[String, Challenge] = {
+  def getChallenge(email: String, submitProject: ProjectDetails): ValidationNel[String, Challenge] = {
     val baseReq = url(challengeUrl(submitProject.courseId))
     val withArgs = baseReq << Map("email_address" -> email,
                                   "assignment_part_sid" -> submitProject.assignmentPartId,
@@ -97,22 +99,22 @@ object CourseraHttp {
       val parts = res.split('|').filterNot(_.isEmpty)
       if (parts.length < 7)
         ("Unexpected challenge format: \n"+ res + "\nNOTE: Make sure you have a freshly" +
-        " downloaded version of the assignment from the correct course.").failNel
+        " downloaded version of the assignment from the correct course.").failureNel
       else
         Challenge(parts(1), parts(3), parts(5)).successNel
     }
   }
 
-  def submitSolution(sourcesJar: File, submitProject: ProjectDetails, challenge: Challenge, chResponse: String): ValidationNEL[String, String] = {
+  def submitSolution(sourcesJar: File, submitProject: ProjectDetails, challenge: Challenge, chResponse: String): ValidationNel[String, String] = {
     val fileLength = sourcesJar.length()
     if (!sourcesJar.exists()) {
-      ("Sources jar archive does not exist\n"+ sourcesJar.getAbsolutePath).failNel
+      ("Sources jar archive does not exist\n"+ sourcesJar.getAbsolutePath).failureNel
     } else if (fileLength == 0l) {
-      ("Sources jar archive is empty\n"+ sourcesJar.getAbsolutePath).failNel
+      ("Sources jar archive is empty\n"+ sourcesJar.getAbsolutePath).failureNel
     } else if (fileLength > maxSubmitFileSize) {
       ("Sources jar archive is too big. Allowed size: "+
         maxSubmitFileSize +" bytes, found "+ fileLength +" bytes.\n"+
-        sourcesJar.getAbsolutePath).failNel
+        sourcesJar.getAbsolutePath).failureNel
     } else {
       val bytes = new Array[Byte](fileLength.toInt)
       val sizeRead = try {
@@ -122,10 +124,10 @@ object CourseraHttp {
         read
       } catch {
         case ex: IOException =>
-          ("Failed to read sources jar archive\n"+ ex.toString()).failNel
+          ("Failed to read sources jar archive\n"+ ex.toString()).failureNel
       }
       if (sizeRead != bytes.length) {
-        ("Failed to read the sources jar archive, size read: "+ sizeRead).failNel
+        ("Failed to read the sources jar archive, size read: "+ sizeRead).failureNel
       } else {
         val fileData = encodeBase64(bytes)
         val baseReq = url(submitUrl(submitProject.courseId))
@@ -140,7 +142,7 @@ object CourseraHttp {
           if (res.contains("Your submission has been accepted"))
             res.successNel
           else
-            res.failNel
+            res.failureNel
         }
       }
     }
@@ -154,7 +156,7 @@ object CourseraHttp {
    * DOWNLOADING SUBMISSIONS
    */
 
-  // def downloadFromQueue(queue: String, targetJar: File, apiKey: String): ValidationNEL[String, QueueResult] = {
+  // def downloadFromQueue(queue: String, targetJar: File, apiKey: String): ValidationNel[String, QueueResult] = {
   //   val baseReq = url(Settings.submitQueueUrl)
   //   val withArgsAndHeader = baseReq << Map("queue" -> queue) <:< Map("X-api-key" -> apiKey)
 
@@ -163,11 +165,11 @@ object CourseraHttp {
   //   }
   // }
 
-  def readJsonFile(jsonFile: File, targetJar: File): ValidationNEL[String, QueueResult] = {
+  def readJsonFile(jsonFile: File, targetJar: File): ValidationNel[String, QueueResult] = {
     extractJson(sbt.IO.read(jsonFile), targetJar)
   }
 
-  def extractJson(jsonData: String, targetJar: File): ValidationNEL[String, QueueResult] = {
+  def extractJson(jsonData: String, targetJar: File): ValidationNel[String, QueueResult] = {
     import SubmitJsonProtocol._
     for {
       jsonSubmission <- {
@@ -175,13 +177,13 @@ object CourseraHttp {
           val parsed = JsonParser(jsonData)
           val submission = parsed \ "submission"
           if (submission == JsNull) {
-            ("Nothing to grade, queue is empty.").failNel
+            ("Nothing to grade, queue is empty.").failureNel
           } else {
             submission.convertTo[JsonSubmission].successNel
           }
         } catch {
           case e: Exception =>
-            ("Could not parse submission\n"+ jsonData +"\n"+ fullExceptionString(e)).failNel
+            ("Could not parse submission\n"+ jsonData +"\n"+ fullExceptionString(e)).failureNel
         }
       }
       queueResult <- {
@@ -192,17 +194,17 @@ object CourseraHttp {
           QueueResult(jsonSubmission.api_state).successNel
         } catch {
           case e: IOException =>
-            ("Failed to write jar file to "+ targetJar.getAbsolutePath +"\n"+ e.toString).failNel
+            ("Failed to write jar file to "+ targetJar.getAbsolutePath +"\n"+ e.toString).failureNel
         }
       }
     } yield queueResult
   }
 
-  def unpackJar(file: File, targetDirectory: File): ValidationNEL[String, Unit] = {
+  def unpackJar(file: File, targetDirectory: File): ValidationNel[String, Unit] = {
     try {
       val files = sbt.IO.unzip(file, targetDirectory)
       if (files.isEmpty)
-        ("No files found when unpacking jar file "+ file.getAbsolutePath).failNel
+        ("No files found when unpacking jar file "+ file.getAbsolutePath).failureNel
       else
         ().successNel
     } catch {
@@ -212,7 +214,7 @@ object CourseraHttp {
           println("[offline mode] "+ msg)
           ().successNel
         } else {
-          msg.failNel
+          msg.failureNel
         }
     }
   }
@@ -222,7 +224,7 @@ object CourseraHttp {
    * SUBMITTING GRADES
    */
 
-  def submitGrade(feedback: String, score: String, apiState: String, apiKey: String, gradeProject: ProjectDetails, logger: Option[Logger]): ValidationNEL[String, Unit] = {
+  def submitGrade(feedback: String, score: String, apiState: String, apiKey: String, gradeProject: ProjectDetails, logger: Option[Logger]): ValidationNel[String, Unit] = {
     import DefaultJsonProtocol._
     val baseReq = url(Settings.uploadFeedbackUrl(gradeProject.courseId))
     val reqArgs = Map("api_state" -> apiState, "score" -> score, "feedback" -> feedback)
@@ -236,10 +238,10 @@ object CourseraHttp {
         if (status == "202")
           ().successNel
         else
-          ("Unexpected result from submit request: "+ status).failNel
+          ("Unexpected result from submit request: "+ status).failureNel
       } catch {
         case e: Exception =>
-          ("Failed to parse response while submitting grade\n"+ res +"\n"+ fullExceptionString(e)).failNel
+          ("Failed to parse response while submitting grade\n"+ res +"\n"+ fullExceptionString(e)).failureNel
       }
     }
   }

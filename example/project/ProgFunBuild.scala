@@ -1,8 +1,9 @@
 import sbt._
 import Keys._
 
-import scalaz.Scalaz.mkIdentity
 import scalaz.{Success, Failure}
+import scalaz.syntax.validation._
+
 import com.typesafe.sbteclipse.plugin.EclipsePlugin.EclipseKeys
 
 /**
@@ -49,6 +50,7 @@ object ProgFunBuild extends Build {
     submitSetting,
     createHandoutSetting,
     // put all libs in the lib_managed directory, that way we can distribute eclipse project files
+    retrieveManaged := true,
     EclipseKeys.relativizeLibs := true,
     // Avoid generating eclipse source entries for the java directories
     (unmanagedSourceDirectories in Compile) <<= (scalaSource in Compile)(Seq(_)),
@@ -60,7 +62,8 @@ object ProgFunBuild extends Build {
     scalaTestSetting,
     styleCheckSetting,
     setTestPropertiesSetting,
-    setTestPropertiesHook
+    setTestPropertiesHook,
+    allProjectsSetting
   ) settings (packageSubmissionFiles: _*)
 
   /***********************************************************
@@ -73,6 +76,11 @@ object ProgFunBuild extends Build {
   /***********************************************************
    * SETTINGS AND TASKS
    */
+
+  // a set of all the Parallel Programming assignments
+  val parProgProjects = Set(
+    "scalashop", "reductions"
+  )
 
   /** The 'submit' task uses this project name (defined in the build.sbt file) to know where to submit the solution */
   val submitProjectName = SettingKey[String]("submitProjectName")
@@ -96,6 +104,9 @@ object ProgFunBuild extends Build {
   /** Package names of source packages common for all projects, see comment in build.sbt */
   val commonSourcePackages = SettingKey[Seq[String]]("commonSourcePackages")
 
+  /** Package names of source packages common for all Parallel Programming projects, see comment in build.sbt */
+  val parProgCommonSourcePackages = SettingKey[Seq[String]]("parProgCommonSourcePackages")
+
   /** Package names of test sources for grading, see comment in build.sbt */
   val gradingTestPackages = SettingKey[Seq[String]]("gradingTestPackages")
 
@@ -114,39 +125,43 @@ object ProgFunBuild extends Build {
   /** Task to submit a solution to coursera */
   val submit = InputKey[Unit]("submit")
 
-  lazy val submitSetting = submit <<= inputTask { argTask =>
-    (argTask, compile in Compile, currentProject, (packageSubmission in Compile), submitProjectName, projectDetailsMap, streams) map { (args, _, currentProject, sourcesJar, projectName, detailsMap, s) =>
-      if (currentProject != "") {
-        val msg =
-          """The 'currentProject' setting is not empty: '%s'
-            |
-            |This error only appears if there are mistakes in the build scripts. Please re-download the assignment
-            |from the coursera webiste. Make sure that you did not perform any changes to the build files in the
-            |`project/` directory. If this error persits, ask for help on the course forums.""".format(currentProject).stripMargin +"\n "
-        s.log.error(msg)
-        failSubmit()
-      } else {
-        lazy val wrongNameMsg =
-          """Unknown project name: %s
-            |
-            |This error only appears if there are mistakes in the build scripts. Please re-download the assignment
-            |from the coursera webiste. Make sure that you did not perform any changes to the build files in the
-            |`project/` directory. If this error persits, ask for help on the course forums.""".format(projectName).stripMargin +"\n "
-        // log strips empty lines at the ond of `msg`. to have one we add "\n "
-        val details = detailsMap.getOrElse(projectName, {s.log.error(wrongNameMsg); failSubmit()})
-        args match {
-          case email :: otPassword :: Nil =>
-            submitSources(sourcesJar, details, email, otPassword, s.log)
-          case _ =>
-            val msg =
-              """No e-mail address and / or submission password provided. The required syntax for `submit` is
-                |  submit <e-mail> <submissionPassword>
-                |
-                |The submission password, which is NOT YOUR LOGIN PASSWORD, can be obtained from the assignment page
-                |  https:/%s/assignment/index""".format(details.courseId).stripMargin + "\n"
-            s.log.error(msg)
-            failSubmit()
-        }
+  lazy val submitSetting = submit := {
+    val args = Def.spaceDelimited("<arg>").parsed
+    val _ = (compile in Compile).value
+    val s = streams.value
+    if (currentProject.value != "") {
+      val msg =
+        """The 'currentProject' setting is not empty: '%s'
+          |
+          |This error only appears if there are mistakes in the build scripts. Please re-download the assignment
+          |from the coursera webiste. Make sure that you did not perform any changes to the build files in the
+          |`project/` directory. If this error persits, ask for help on the course forums.""".format(currentProject.value).stripMargin +"\n "
+      s.log.error(msg)
+      failSubmit()
+    } else {
+      val projectName = submitProjectName.value
+      lazy val wrongNameMsg =
+        """Unknown project name: %s
+          |
+          |This error only appears if there are mistakes in the build scripts. Please re-download the assignment
+          |from the coursera webiste. Make sure that you did not perform any changes to the build files in the
+          |`project/` directory. If this error persits, ask for help on the course forums.""".format(projectName).stripMargin +"\n "
+      // log strips empty lines at the ond of `msg`. to have one we add "\n "
+      val detailsMap = projectDetailsMap.value
+      val details = detailsMap.getOrElse(projectName, {s.log.error(wrongNameMsg); failSubmit()})
+      args match {
+        case email :: otPassword :: Nil =>
+          val sourcesJar = (packageSubmission in Compile).value
+          submitSources(sourcesJar, details, email, otPassword, s.log)
+        case _ =>
+          val msg =
+            """No e-mail address and / or submission password provided. The required syntax for `submit` is
+              |  submit <e-mail> <submissionPassword>
+              |
+              |The submission password, which is NOT YOUR LOGIN PASSWORD, can be obtained from the assignment page
+              |  https:/%s/assignment/index""".format(details.courseId).stripMargin + "\n"
+          s.log.error(msg)
+          failSubmit()
       }
     }
   }
@@ -199,39 +214,51 @@ object ProgFunBuild extends Build {
    * CREATE THE HANDOUT ZIP FILE
    */
 
+  /**
+   * Displays the list of all projects.
+   */
+  val allProjects = taskKey[Unit]("allProjects")
+
+  lazy val allProjectsSetting = allProjects := {
+    println(projectDetailsMap.value.keys.mkString("\n"))
+  }
+
   val createHandout = InputKey[File]("createHandout")
 
   // depends on "compile in Test" to make sure everything compiles. also makes sure that
   // all dependencies are downloaded, because we pack the .jar files into the handout.
-  lazy val createHandoutSetting = createHandout <<= inputTask { argTask =>
-    (argTask, currentProject, baseDirectory, handoutFiles, submitProjectName, target, projectDetailsMap, compile in Test) map { (args, currentProject, basedir, filesFinder, submitProject, targetDir, detailsMap, _) =>
-      if (currentProject != "" && currentProject != submitProject)
-        sys.error("\nthe 'currentProject' setting in build.sbt needs to be \"\" or equal to submitProject in order to create a handout")
-      else args match {
-        case handoutProjectName :: eclipseDone :: Nil if eclipseDone == "eclipseWasCalled" =>
-          if (handoutProjectName != submitProject)
-            sys.error("\nThe `submitProjectName` setting in `build.sbt` must match the project name for which a handout is generated\n ")
-          val files = filesFinder(handoutProjectName).get
-          def withRelativeNames(fs: Seq[File]) = fs.x_!(relativeTo(basedir)) map {
-            case (file, name) => (file, handoutProjectName+"/"+name)
-          }
-          val filesWithRelativeNames = withRelativeNames(files)
-          val manualDepsWithRelativeNames = withRelativeNames(IO.listFiles(basedir / "lib"))
-          val targetZip = targetDir / (handoutProjectName +".zip")
-          IO.zip(filesWithRelativeNames ++ manualDepsWithRelativeNames, targetZip)
-          targetZip
-        case _ =>
-          val msg ="""
-            |
-            |Failed to create handout. Syntax: `createHandout <projectName> <eclipseWasCalled>`
-            |
-            |Valid project names are: %s
-            |
-            |The argument <eclipseWasCalled> needs to be the string "eclipseWasCalled". This is to remind
-            |you that you **need** to manually run the `eclipse` command before running `createHandout`.
-            | """.stripMargin.format(detailsMap.keys.mkString(", "))
-          sys.error(msg)
-      }
+  lazy val createHandoutSetting = createHandout := {
+    val args = Def.spaceDelimited("<arg>").parsed
+    val _ = (compile in Test).value
+    if (currentProject.value != "" && currentProject.value != submitProjectName.value)
+      sys.error("\nthe 'currentProject' setting in build.sbt needs to be \"\" or equal to submitProjectName in order to create a handout")
+    else args match {
+      case handoutProjectName :: eclipseDone :: Nil if eclipseDone == "eclipseWasCalled" =>
+        if (handoutProjectName != submitProjectName.value)
+          sys.error("\nThe `submitProjectName` setting in `build.sbt` must match the project name for which a handout is generated\n ")
+        val filesFinder = handoutFiles.value
+        val files = filesFinder(handoutProjectName).get
+        val basedir = baseDirectory.value
+        def withRelativeNames(fs: Seq[File]) = fs.pair(relativeTo(basedir)) map {
+          case (file, name) => (file, handoutProjectName+"/"+name)
+        }
+        val filesWithRelativeNames = withRelativeNames(files)
+        val manualDepsWithRelativeNames = withRelativeNames(IO.listFiles(basedir / "lib"))
+        val targetZip = target.value / (handoutProjectName +".zip")
+        IO.zip(filesWithRelativeNames ++ manualDepsWithRelativeNames, targetZip)
+        targetZip
+      case _ =>
+        val detailsMap = projectDetailsMap.value
+        val msg ="""
+          |
+          |Failed to create handout. Syntax: `createHandout <projectName> <eclipseWasCalled>`
+          |
+          |Valid project names are: %s
+          |
+          |The argument <eclipseWasCalled> needs to be the string "eclipseWasCalled". This is to remind
+          |you that you **need** to manually run the `eclipse` command before running `createHandout`.
+          | """.stripMargin.format(detailsMap.keys.mkString(", "))
+        sys.error(msg)
     }
   }
 
@@ -267,12 +294,15 @@ object ProgFunBuild extends Build {
   }
 
   /**
-   * Only include source files of 'currentProject', helpful when preparign a specific assignment.
-   * Also keeps the source packages in 'commonSourcePackages'.
+   * Only include source files of 'currentProject', helpful when preparing a specific assignment.
+   * Also keeps the source packages in 'commonSourcePackages' and 'parProgCommonSourcePackages' if this is a Parallel Programming exercise.
    */
   val selectMainSources = {
-    (unmanagedSources in Compile) <<= (unmanagedSources in Compile, scalaSource in Compile, projectDetailsMap, currentProject, commonSourcePackages) map { (sources, srcMainScalaDir, detailsMap, projectName, commonSrcs) =>
-      projectFiles(sources, srcMainScalaDir, projectName, commonSrcs, detailsMap)
+    (unmanagedSources in Compile) <<= (unmanagedSources in Compile, scalaSource in Compile, projectDetailsMap, currentProject, commonSourcePackages, parProgCommonSourcePackages) map { (sources, srcMainScalaDir, detailsMap, projectName, commonSrcs, parProgCommonSrcs) =>
+      val globalSrcs =
+        if (parProgProjects(projectName)) commonSrcs ++ parProgCommonSrcs
+        else commonSrcs
+      projectFiles(sources, srcMainScalaDir, projectName, globalSrcs, detailsMap)
     }
   }
 
@@ -312,9 +342,9 @@ object ProgFunBuild extends Build {
    */
 
   def copiedResourceFiles(copied: collection.Seq[(java.io.File, java.io.File)]): List[File] = {
-    copied collect {
+    copied.collect {
       case (from, to) if to.isFile => to
-    } toList
+    }.toList
   }
 
   val scalaTest = TaskKey[Unit]("scalaTest")
@@ -543,8 +573,8 @@ object ProgFunBuild extends Build {
     }
   }
 
-  val readCompileLog = (compile in Compile) <<= (compile in Compile) mapR handleFailure(compileFailed)
-  val readTestCompileLog = (compile in Test) <<= (compile in Test) mapR handleFailure(compileTestFailed)
+  val readCompileLog = (compile in Compile) <<= (compile in Compile).result map handleFailure(compileFailed)
+  val readTestCompileLog = (compile in Test) <<= (compile in Test).result map handleFailure(compileTestFailed)
 
   def handleFailure[R](handler: (Incomplete, String) => Unit) = (res: Result[R]) => res match {
     case Inc(inc) =>
@@ -656,9 +686,10 @@ object ProgFunBuild extends Build {
     apiKeyR match {
       case Value(originalApiKey) if (!originalApiKey.isEmpty) =>
         val apiKey = projectDetails.courseId match { // OMG what a hack!!!
-          case "progfun-005" => "jqw9WQi3MgvmOJsK"
+          case "progfun-006" => "iqw9WQi3MgvmOJsK"
           case "reactive-001" => "Pwnc6dEcYBBAuCSP2mof-react"
           case "progfun2-002" => "iqw9WQi3MgvmOJsK"
+          case "parprog-001" => "jqw9WQi3MgvmOJsK-parprog"
         }
         logOpt.foreach(_.debug("Course Id for submission: " + projectDetails.courseId))
         logOpt.foreach(_.debug("Corresponding API key: " + apiKey))

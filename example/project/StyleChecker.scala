@@ -81,7 +81,7 @@ object StyleChecker {
       "Processed " + outputResult.files + " file(s)\n" +
       "Found " + outputResult.errors + " errors\n" +
       "Found " + outputResult.warnings + " warnings\n" +
-      (if (outputResult.errors+outputResult.warnings > 0) "Consult the style guide at %s/wiki/ScalaStyleGuide".format(baseURL("progfun-005")) else "")
+      (if (outputResult.errors+outputResult.warnings > 0) "Consult the style guide at %s/wiki/ScalaStyleGuide".format(baseURL("progfun-006")) else "")
 
     (msg, score(outputResult))
   }

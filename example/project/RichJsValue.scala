@@ -1,4 +1,6 @@
-import cc.spray.json._
+import scala.language.implicitConversions
+
+import spray.json._
 
 class RichJsValue(js: JsValue) {
   def \ (name: String): JsValue = js match {
@@ -17,7 +19,7 @@ class RichJsValue(js: JsValue) {
 
   def arrayValues: List[JsValue] = js match {
     case JsArray(values) =>
-      values
+      values.toList
     case _ =>
       throw new IllegalArgumentException("Trying to select values from non-JsArray"+ js)
   }
