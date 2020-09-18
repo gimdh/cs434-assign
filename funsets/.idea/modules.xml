@@ -3,8 +3,12 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/assignment.iml" filepath="$PROJECT_DIR$/.idea/modules/assignment.iml" group="funsets" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cs434-assign.funsets-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/cs434-assign.funsets-sources.iml" group="funsets" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/funsets-build.iml" filepath="$PROJECT_DIR$/.idea/modules/funsets-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/funsets-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/funsets-sources.iml" group="funsets" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/funsets.assignment.iml" filepath="$PROJECT_DIR$/.idea/modules/funsets.assignment.iml" group="funsets" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/funsets.submission.iml" filepath="$PROJECT_DIR$/.idea/modules/funsets.submission.iml" group="funsets" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/project.funsets-build.iml" filepath="$PROJECT_DIR$/.idea/modules/project.funsets-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/submission.iml" filepath="$PROJECT_DIR$/.idea/modules/submission.iml" group="funsets" />
     </modules>
   </component>
