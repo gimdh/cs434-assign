@@ -25,30 +25,24 @@ jobs:
     - name: Recfun test
       run: sbt test
       working-directory: recfun
-      continue-on-error: true
         
     - name: Funsets test
       run: sbt test
       working-directory: funsets
-      continue-on-error: true
       
     - name: Objsets test
       run: sbt test
       working-directory: objsets
-      continue-on-error: true
       
     - name: Patmat test
       run: sbt test
       working-directory: patmat
-      continue-on-error: true
       
     - name: Forcomp test
       run: sbt test
       working-directory: forcomp
-      continue-on-error: true
       
     - name: Streams test
       run: sbt test
       working-directory: streams
-      continue-on-error: true
       
