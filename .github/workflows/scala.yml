@@ -20,7 +20,7 @@ jobs:
     - name: Example test
       run: sbt test
       working-directory: example
-        continue-on-error: true
+      continue-on-error: true
 
     - name: Recfun test
       run: sbt test
