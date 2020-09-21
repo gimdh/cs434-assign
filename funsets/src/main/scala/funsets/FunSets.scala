@@ -61,7 +61,7 @@ object FunSets {
     @tailrec
     def iter(a: Int): Boolean = {
       if (a > bound) true
-      else if (s(a) && p(a) == false) false
+      else if (s(a) && !p(a)) false
       else iter(a + 1)
     }
     iter(-bound)
