@@ -66,14 +66,7 @@ abstract class TweetSet {
    * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-    def mostRetweeted: Tweet = {
-      mostRetweetedMax
-    }
-
-  /**
-   * This is a helper method for `mostRetweeted` that propagates the accumulated tweets.
-   */
-  def mostRetweetedMax: Tweet
+  def mostRetweeted: Tweet
 
   /**
    * Returns a list containing all tweets of this set, sorted by retweet count
@@ -118,7 +111,7 @@ class Empty extends TweetSet {
 
   override def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = acc
 
-  override def mostRetweetedMax: Tweet = throw new NoSuchElementException()
+  override def mostRetweeted: Tweet = throw new NoSuchElementException()
 
   override def descendingByRetweet: TweetList = Nil
 
@@ -144,19 +137,18 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     right.filterAcc(p, b)
   }
 
-  override def mostRetweetedMax: Tweet = {
-    def maxTweet(a: Tweet, b: Tweet): Tweet = {
+  override def mostRetweeted: Tweet = {
+    def maxTweet(a: Tweet, b: Tweet): Tweet =
       if (a.retweets > b.retweets) a else b
-    }
 
-    val a = left match {
-      case _: Empty => this.elem
-      case _: NonEmpty => maxTweet(left.mostRetweetedMax, this.elem)
-    }
-    val b = right match {
-      case _: Empty => this.elem
-      case _: NonEmpty => maxTweet(right.mostRetweetedMax, this.elem)
-    }
+    def checkTypeThenGetMax(a: TweetSet): Tweet =
+      a match {
+        case _: Empty => this.elem
+        case _: NonEmpty => maxTweet(a.mostRetweeted, this.elem)
+      }
+
+    lazy val a = checkTypeThenGetMax(left)
+    lazy val b = checkTypeThenGetMax(right)
 
     maxTweet(a, b)
   }

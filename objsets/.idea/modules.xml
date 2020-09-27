@@ -3,8 +3,12 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/assignment.iml" filepath="$PROJECT_DIR$/.idea/modules/assignment.iml" group="objsets" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cs434-assign-objsets-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/cs434-assign-objsets-sources.iml" group="objsets" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/objsets-assignment.iml" filepath="$PROJECT_DIR$/.idea/modules/objsets-assignment.iml" group="objsets" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/objsets-build.iml" filepath="$PROJECT_DIR$/.idea/modules/objsets-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/objsets-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/objsets-sources.iml" group="objsets" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/objsets-submission.iml" filepath="$PROJECT_DIR$/.idea/modules/objsets-submission.iml" group="objsets" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/project-objsets-build.iml" filepath="$PROJECT_DIR$/.idea/modules/project-objsets-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/submission.iml" filepath="$PROJECT_DIR$/.idea/modules/submission.iml" group="objsets" />
     </modules>
   </component>

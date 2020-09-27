@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ScalaCompilerConfiguration">
     <option name="incrementalityType" value="SBT" />
-    <profile name="sbt 1" modules="recfun_5091,recitations" />
-    <profile name="sbt 2" modules="assignment,submission">
+    <profile name="sbt 1" modules="recfun-recitations,recfun_5091,recitations" />
+    <profile name="sbt 2" modules="assignment,recfun-assignment,recfun-submission,submission">
       <option name="deprecationWarnings" value="true" />
       <option name="featureWarnings" value="true" />
     </profile>

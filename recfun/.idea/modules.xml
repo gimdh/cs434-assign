@@ -3,8 +3,13 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/assignment.iml" filepath="$PROJECT_DIR$/.idea/modules/assignment.iml" group="progfun-recfun" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cs434-assign-recfun-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/cs434-assign-recfun-sources.iml" group="progfun-recfun" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/progfun-recfun-build.iml" filepath="$PROJECT_DIR$/.idea/modules/progfun-recfun-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/project-progfun-recfun-build.iml" filepath="$PROJECT_DIR$/.idea/modules/project-progfun-recfun-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/recfun-assignment.iml" filepath="$PROJECT_DIR$/.idea/modules/recfun-assignment.iml" group="progfun-recfun" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/recfun-recitations.iml" filepath="$PROJECT_DIR$/.idea/modules/recfun-recitations.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/recfun-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/recfun-sources.iml" group="progfun-recfun" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/recfun-submission.iml" filepath="$PROJECT_DIR$/.idea/modules/recfun-submission.iml" group="progfun-recfun" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/recitations.iml" filepath="$PROJECT_DIR$/.idea/modules/recitations.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/submission.iml" filepath="$PROJECT_DIR$/.idea/modules/submission.iml" group="progfun-recfun" />
     </modules>

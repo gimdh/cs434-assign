@@ -64,10 +64,15 @@ class TweetSetSuite extends FunSuite {
 
   test("descending: set5") {
     new TestSets {
-      val trends = set5.descendingByRetweet
-      assert(!trends.isEmpty)
-      assert(trends.head.user == "a" || trends.head.user == "b")
+      val targetRetweets = List(20, 20, 9, 7)
+
+      def testAllElems(result: TweetList, target: List[Int]): Boolean = {
+        if (result.isEmpty && target.isEmpty) true
+        else if (result.head.retweets == target.head) testAllElems(result.tail, target.tail)
+        else false
+      }
+
+      assert(testAllElems(set5.descendingByRetweet, targetRetweets))
     }
   }
-
-  }
+}
