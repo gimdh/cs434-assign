@@ -1,8 +1,10 @@
 name: patmat test
 
-on: [push, pull_request]
-  paths:
-  - 'patmat/**'
+on:
+  push:
+    paths:
+    - '.github/**'
+    - 'patmat/**'
 
 jobs:
   patmat:

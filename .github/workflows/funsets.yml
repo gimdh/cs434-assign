@@ -1,8 +1,10 @@
 name: funsets test
 
-on: [push, pull_request]
-  paths:
-  - 'funsets/**'
+on:
+  push:
+    paths:
+    - '.github/**'
+    - 'funsets/**'
 
 jobs:
   funsets:

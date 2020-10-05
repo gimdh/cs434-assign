@@ -1,8 +1,10 @@
 name: forcomp test
 
-on: [push, pull_request]
-  paths:
-  - 'forcomp/**'
+on:
+  push:
+    paths:
+    - '.github/**'
+    - 'forcomp/**'
 
 jobs:
   forcomp:

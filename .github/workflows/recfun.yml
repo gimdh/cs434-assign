@@ -1,8 +1,10 @@
 name: recfun test
 
-on: [push, pull_request]
-  paths:
-  - 'recfun/**'
+on:
+  push:
+    paths:
+    - '.github/**'
+    - 'recfun/**'
 
 jobs:
   recfun:
