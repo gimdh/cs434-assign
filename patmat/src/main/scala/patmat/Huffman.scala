@@ -80,19 +80,7 @@ object Huffman {
    *   }
    */
   def times(chars: List[Char]): List[(Char, Int)] = {
-    @tailrec
-    def times_aux(chars: List[Char], counter: Map[Char, Int]): List[(Char, Int)] = {
-      chars match {
-        case Nil => counter.toList
-        case head :: tail =>
-          counter.get(head) match {
-            case None => times_aux(tail, counter + (head -> 1))
-            case count: Some[Int] => times_aux(tail, counter + (head -> (count.get + 1)))
-          }
-      }
-    }
-
-    times_aux(chars, Map[Char, Int]())
+    chars.groupBy(identity).mapValues(_.size).toList
   }
 
   /**
@@ -196,6 +184,7 @@ object Huffman {
     @tailrec
     def decode_aux(root: CodeTree, bits: List[Bit], result: List[Char]): List[Char] = {
       root match {
+      /* May infinite loop if CodeTree root is Leaf, but such tree is illegal since it cannot generate any code */
         case Leaf(char, _) => decode_aux(tree, bits, char :: result)
         case Fork(left, right, _, _) =>
           bits match {
@@ -298,14 +287,6 @@ object Huffman {
     val table = convert(tree)
     val myBits: Char => List[Bit] = codeBits(table)
 
-    @tailrec
-    def quickEncode_aux(text: List[Char], result: List[Bit]): List[Bit] = {
-      text match {
-        case Nil => result.reverse
-        case head::tail => quickEncode_aux(tail, myBits(head).reverse:::result)
-      }
-    }
-
-    quickEncode_aux(text, List())
+    text.flatMap(myBits)
   }
 }
