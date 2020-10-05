@@ -3,8 +3,12 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/assignment.iml" filepath="$PROJECT_DIR$/.idea/modules/assignment.iml" group="patmat" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cs434-assign.patmat-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/cs434-assign.patmat-sources.iml" group="patmat" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/patmat-build.iml" filepath="$PROJECT_DIR$/.idea/modules/patmat-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/patmat-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/patmat-sources.iml" group="patmat" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/patmat.assignment.iml" filepath="$PROJECT_DIR$/.idea/modules/patmat.assignment.iml" group="patmat" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/patmat.submission.iml" filepath="$PROJECT_DIR$/.idea/modules/patmat.submission.iml" group="patmat" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/project.patmat-build.iml" filepath="$PROJECT_DIR$/.idea/modules/project.patmat-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/submission.iml" filepath="$PROJECT_DIR$/.idea/modules/submission.iml" group="patmat" />
     </modules>
   </component>
