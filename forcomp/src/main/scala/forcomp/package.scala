@@ -20,5 +20,4 @@ package object forcomp {
       wordstream.close()
     }
   }
-
 }
