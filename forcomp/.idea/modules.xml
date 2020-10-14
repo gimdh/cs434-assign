@@ -3,8 +3,12 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/assignment.iml" filepath="$PROJECT_DIR$/.idea/modules/assignment.iml" group="forcomp" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cs434-assign.forcomp-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/cs434-assign.forcomp-sources.iml" group="forcomp" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/forcomp-build.iml" filepath="$PROJECT_DIR$/.idea/modules/forcomp-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/forcomp-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/forcomp-sources.iml" group="forcomp" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/forcomp.assignment.iml" filepath="$PROJECT_DIR$/.idea/modules/forcomp.assignment.iml" group="forcomp" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/forcomp.submission.iml" filepath="$PROJECT_DIR$/.idea/modules/forcomp.submission.iml" group="forcomp" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/project.forcomp-build.iml" filepath="$PROJECT_DIR$/.idea/modules/project.forcomp-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/submission.iml" filepath="$PROJECT_DIR$/.idea/modules/submission.iml" group="forcomp" />
     </modules>
   </component>

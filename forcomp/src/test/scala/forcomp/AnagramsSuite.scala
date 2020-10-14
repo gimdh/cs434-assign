@@ -18,6 +18,12 @@ class AnagramsSuite extends FunSuite  {
     assert(wordOccurrences("Robert") === List(('b', 1), ('e', 1), ('o', 1), ('r', 2), ('t', 1)))
   }
 
+  test("wordOccurrences: CAPITALS") {
+    assert(wordOccurrences("CAPITALS") === List(('a', 2), ('c', 1), ('i', 1), ('l', 1), ('p', 1), ('s', 1), ('t', 1)))
+  }
+
+
+
 	test("sentenceOccurrences: abcd e") {
     assert(sentenceOccurrences(List("abcd", "e")) === List(('a', 1), ('b', 1), ('c', 1), ('d', 1), ('e', 1)))
   }
@@ -26,10 +32,16 @@ class AnagramsSuite extends FunSuite  {
     assert(sentenceOccurrences(List("abcd", "cde")) === List(('a', 1), ('b', 1), ('c', 2), ('d', 2), ('e', 1)))
   }
 
+  test("sentenceOccurrences: dcba edc") {
+    assert(sentenceOccurrences(List("dcba", "edc")) === List(('a', 1), ('b', 1), ('c', 2), ('d', 2), ('e', 1)))
+  }
+
+
 
 	test("dictionaryByOccurrences.get: eat") {
     assert(dictionaryByOccurrences.get(List(('a', 1), ('e', 1), ('t', 1))).map(_.toSet) === Some(Set("ate", "eat", "tea")))
   }
+
 
 
 	test("word anagrams: married") {
@@ -57,6 +69,7 @@ class AnagramsSuite extends FunSuite  {
   }
 
 
+
 	test("combinations: []") {
     assert(combinations(Nil) === List(Nil))
   }
@@ -76,6 +89,7 @@ class AnagramsSuite extends FunSuite  {
     )
     assert(combinations(abba).toSet === abbacomb.toSet)
   }
+
 
 
 	test("sentence anagrams: []") {
